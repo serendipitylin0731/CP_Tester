@@ -1,6 +1,6 @@
 # CP Tester（奶蛙版）
 
-> version: 0.1.3
+> version: 0.2.1
 
 > Editor: serendipity_lin@sjtu.edu.cn
 
@@ -45,7 +45,7 @@ npx vsce package --out build/
 
 ### 从 VSIX 安装
 
-1. 下载 `cp-tester-0.1.1.vsix` 文件。
+1. 下载 `cp-tester-x.x.x.vsix` 文件。
 2. 打开 VS Code，点击左侧活动栏的**扩展图标**（四个方块）。
 3. 点击扩展面板右上角的 `...`（更多操作），选择 **从 VSIX 安装...**。
 4. 选择下载的 `.vsix` 文件，等待安装完成。

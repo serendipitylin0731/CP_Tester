@@ -55,29 +55,23 @@
         els.testCasesContainer.innerHTML = '';
 
         if (folderMode) {
-            // Show read-only list of test case names
-            const div = document.createElement('div');
-            div.className = 'section-title';
-            div.textContent = `Test Cases from Folder (${testCases.length})`;
-            els.testCasesContainer.appendChild(div);
-
+            // Folder mode: show only name + result area for each case
             testCases.forEach(tc => {
                 const item = document.createElement('div');
-                item.className = 'test-case';
+                item.className = 'test-case folder-case';
+                item.dataset.id = tc.id;
                 item.innerHTML = `
                     <div class="test-case-header">
                         <span>${escapeHtml(tc.name || `Case ${tc.id}`)}</span>
                     </div>
-                    <label>Input preview:</label>
-                    <textarea readonly>${escapeHtml(tc.input.substring(0, 200))}${tc.input.length > 200 ? '...' : ''}</textarea>
-                    <label>Expected output preview:</label>
-                    <textarea readonly>${escapeHtml(tc.expectedOutput.substring(0, 200))}${tc.expectedOutput.length > 200 ? '...' : ''}</textarea>
+                    <div class="result-area" id="result-${tc.id}"></div>
                 `;
                 els.testCasesContainer.appendChild(item);
             });
             return;
         }
 
+        // Manual mode: input/output + result area for each case
         testCases.forEach((tc, index) => {
             const div = document.createElement('div');
             div.className = 'test-case';
@@ -91,6 +85,7 @@
                 <textarea class="input-area" placeholder="Enter input here...">${escapeHtml(tc.input)}</textarea>
                 <label>Expected Output:</label>
                 <textarea class="output-area" placeholder="Enter expected output here...">${escapeHtml(tc.expectedOutput)}</textarea>
+                <div class="result-area" id="result-${tc.id}"></div>
             `;
             els.testCasesContainer.appendChild(div);
         });
@@ -109,14 +104,18 @@
             const id = parseInt(el.dataset.id);
             const inputArea = el.querySelector('.input-area');
             const outputArea = el.querySelector('.output-area');
-            inputArea.addEventListener('input', () => {
-                const tc = testCases.find(t => t.id === id);
-                if (tc) tc.input = inputArea.value;
-            });
-            outputArea.addEventListener('input', () => {
-                const tc = testCases.find(t => t.id === id);
-                if (tc) tc.expectedOutput = outputArea.value;
-            });
+            if (inputArea) {
+                inputArea.addEventListener('input', () => {
+                    const tc = testCases.find(t => t.id === id);
+                    if (tc) tc.input = inputArea.value;
+                });
+            }
+            if (outputArea) {
+                outputArea.addEventListener('input', () => {
+                    const tc = testCases.find(t => t.id === id);
+                    if (tc) tc.expectedOutput = outputArea.value;
+                });
+            }
         });
     }
 
@@ -132,14 +131,16 @@
                 const id = parseInt(el.dataset.id);
                 const tc = testCases.find(t => t.id === id);
                 if (tc) {
-                    tc.input = el.querySelector('.input-area').value;
-                    tc.expectedOutput = el.querySelector('.output-area').value;
+                    const inputArea = el.querySelector('.input-area');
+                    const outputArea = el.querySelector('.output-area');
+                    if (inputArea) tc.input = inputArea.value;
+                    if (outputArea) tc.expectedOutput = outputArea.value;
                 }
             });
         }
 
-        // Clear previous results
-        els.resultsContainer.innerHTML = '';
+        // Clear previous results from each test case's result area
+        document.querySelectorAll('.result-area').forEach(el => el.innerHTML = '');
         updateImage('Pending');
 
         vscode.postMessage({
@@ -175,10 +176,11 @@
     function showResult(result) {
         let el = document.getElementById(`result-${result.id}`);
         if (!el) {
+            // If result area doesn't exist yet (shouldn't happen with new render), create one
             el = document.createElement('div');
             el.id = `result-${result.id}`;
-            el.className = 'result-item';
-            els.resultsContainer.appendChild(el);
+            el.className = 'result-area';
+            els.testCasesContainer.appendChild(el);
         }
 
         const statusClass = 'status-' + result.status.replace(/\s+/g, '-');
@@ -191,10 +193,9 @@
 
         el.innerHTML = `
             <div class="result-header">
-                <span class="result-name">${escapeHtml(result.name || `Case ${result.id}`)}</span>
                 <span class="result-status ${statusClass}">${result.status}</span>
+                <span class="result-meta">${result.time}ms | ${result.memory}MiB</span>
             </div>
-            <div class="result-meta">Time: ${result.time}ms | Memory: ${result.memory}MiB</div>
             ${extra}
         `;
     }
@@ -220,8 +221,14 @@
                 folderPath = msg.folderPath || '';
                 if (folderMode && folderPath) {
                     els.folderInfo.style.display = 'block';
-                    els.folderInfo.textContent = `Folder: ${folderPath}`;
+                    els.folderInfo.innerHTML = `
+                        <span>Folder: ${folderPath}</span>
+                        <button id="btn-exit-folder" title="Exit folder mode">✕</button>
+                    `;
                     els.btnAdd.style.display = 'none';
+                    document.getElementById('btn-exit-folder')?.addEventListener('click', () => {
+                        vscode.postMessage({ type: 'exitFolderMode' });
+                    });
                 }
                 renderTestCases();
                 break;
@@ -249,8 +256,27 @@
                 folderMode = true;
                 folderPath = msg.folderPath;
                 els.folderInfo.style.display = 'block';
-                els.folderInfo.textContent = `Folder: ${folderPath} (${testCases.length} cases)`;
+                els.folderInfo.innerHTML = `
+                    <span>Folder: ${folderPath} (${testCases.length} cases)</span>
+                    <button id="btn-exit-folder" title="Exit folder mode">✕</button>
+                `;
                 els.btnAdd.style.display = 'none';
+                els.resultsContainer.innerHTML = '';
+                renderTestCases();
+                // Bind exit button
+                document.getElementById('btn-exit-folder')?.addEventListener('click', () => {
+                    vscode.postMessage({ type: 'exitFolderMode' });
+                });
+                break;
+
+            case 'folderExited':
+                testCases = msg.testCases || [{ id: 1, input: '', expectedOutput: '' }];
+                folderMode = false;
+                folderPath = '';
+                nextId = Math.max(...testCases.map(t => t.id)) + 1;
+                els.folderInfo.style.display = 'none';
+                els.folderInfo.innerHTML = '';
+                els.btnAdd.style.display = '';
                 els.resultsContainer.innerHTML = '';
                 renderTestCases();
                 break;
@@ -269,7 +295,7 @@
                 break;
 
             case 'clearResults':
-                els.resultsContainer.innerHTML = '';
+                document.querySelectorAll('.result-area').forEach(el => el.innerHTML = '');
                 break;
         }
     });

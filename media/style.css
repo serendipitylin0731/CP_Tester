@@ -79,6 +79,27 @@ body {
     padding: 6px;
     background: var(--vscode-textBlockQuote-background);
     border-radius: 3px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+#folder-info span {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#btn-exit-folder {
+    background: none;
+    border: none;
+    color: var(--vscode-errorForeground);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 4px;
+    line-height: 1;
 }
 
 .test-case {
@@ -183,6 +204,23 @@ body {
 
 .result-error {
     color: var(--vscode-errorForeground);
+}
+
+.folder-case {
+    padding: 8px 10px;
+}
+
+.folder-case .test-case-header {
+    margin-bottom: 4px;
+}
+
+.result-area {
+    margin-top: 6px;
+    min-height: 0;
+}
+
+.result-area:empty {
+    display: none;
 }
 
 .section-title {

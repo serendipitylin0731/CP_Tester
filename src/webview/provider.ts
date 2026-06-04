@@ -46,6 +46,9 @@ export class TesterProvider implements vscode.WebviewViewProvider {
                 case 'getImageList':
                     this._sendImageList();
                     break;
+                case 'exitFolderMode':
+                    this._handleExitFolderMode();
+                    break;
             }
         });
 
@@ -217,6 +220,16 @@ export class TesterProvider implements vscode.WebviewViewProvider {
             testCases: this._testCases,
             folderMode: this._folderMode,
             folderPath: this._folderPath
+        });
+    }
+
+    private _handleExitFolderMode() {
+        this._testCases = [{ id: 1, input: '', expectedOutput: '' }];
+        this._folderMode = false;
+        this._folderPath = '';
+        this._view?.webview.postMessage({
+            type: 'folderExited',
+            testCases: this._testCases
         });
     }
 
