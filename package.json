@@ -2,7 +2,11 @@
   "name": "cp-tester",
   "displayName": "CP Tester",
   "description": "A VS Code extension for competitive programming problem testing",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/serendipitylin0731/CP_Tester.git"
+  },
   "publisher": "cp-tester",
   "license": "MIT",
   "engines": {
@@ -83,14 +87,11 @@
     "watch": "tsc -watch -p ./"
   },
   "dependencies": {
-    "koffi": "^2.0.0"
+    "koffi": "^3.0.2"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "@types/vscode": "^1.80.0",
     "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "koffi": "^3.0.2"
   }
 }
