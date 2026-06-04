@@ -1,0 +1,96 @@
+{
+  "name": "cp-tester",
+  "displayName": "CP Tester",
+  "description": "A VS Code extension for competitive programming problem testing",
+  "version": "0.1.0",
+  "publisher": "cp-tester",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:cpp",
+    "onLanguage:c",
+    "onLanguage:python",
+    "onView:cpTester.panel"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "cpTester",
+          "title": "CP Tester",
+          "icon": "$(beaker)"
+        }
+      ]
+    },
+    "views": {
+      "cpTester": [
+        {
+          "type": "webview",
+          "id": "cpTester.panel",
+          "name": "Tester",
+          "icon": "$(beaker)"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "cpTester.runTests",
+        "title": "Run Tests",
+        "icon": "$(play)"
+      },
+      {
+        "command": "cpTester.selectFolder",
+        "title": "Select Test Data Folder",
+        "icon": "$(folder-opened)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "cpTester.runTests",
+        "key": "ctrl+alt+t",
+        "when": "editorTextFocus && (editorLangId == cpp || editorLangId == c || editorLangId == python)"
+      }
+    ],
+    "configuration": {
+      "title": "CP Tester",
+      "properties": {
+        "cpTester.timeLimit": {
+          "type": "number",
+          "default": 1000,
+          "minimum": 1,
+          "maximum": 60000,
+          "description": "Default time limit in milliseconds"
+        },
+        "cpTester.memoryLimit": {
+          "type": "number",
+          "default": 256,
+          "minimum": 1,
+          "maximum": 2048,
+          "description": "Default memory limit in MiB"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "dependencies": {
+    "koffi": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.80.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "koffi": "^3.0.2"
+  }
+}
