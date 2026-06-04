@@ -46,8 +46,13 @@ export async function compile(sourcePath: string): Promise<CompileResult> {
 
 export function cleanupExecutable(executablePath: string) {
     try {
-        if (fs.existsSync(executablePath)) {
-            fs.unlinkSync(executablePath);
+        // Only delete files in temp directory (compiled executables).
+        // For Python, executablePath is the source file itself - do NOT delete it.
+        const tmpDir = os.tmpdir().toLowerCase();
+        if (executablePath.toLowerCase().startsWith(tmpDir)) {
+            if (fs.existsSync(executablePath)) {
+                fs.unlinkSync(executablePath);
+            }
         }
     } catch {
         // ignore cleanup errors
