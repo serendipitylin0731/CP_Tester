@@ -1,4 +1,6 @@
-# CP Tester（奶娃版）
+# CP Tester（奶蛙版）
+
+![](https://notes.sjtu.edu.cn/uploads/upload_9d39e35327a0ef8f2f74dcc61ba2aabc.jpg)
 
 一款专为算法竞赛和编程练习设计的 VS Code 插件，提供便捷的本地测试与评测功能。
 
