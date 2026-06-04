@@ -1,8 +1,9 @@
 {
   "name": "cp-tester",
   "displayName": "CP Tester",
-  "description": "A VS Code extension for competitive programming problem testing",
+  "description": "A VS Code extension for program testing",
   "version": "0.1.2",
+  "icon": "media/sets/6bc0d3a8a1cee7b0e9160a5298f038b6.jpg",
   "repository": {
     "type": "git",
     "url": "https://github.com/serendipitylin0731/CP_Tester.git"
@@ -18,8 +19,7 @@
   "activationEvents": [
     "onLanguage:cpp",
     "onLanguage:c",
-    "onLanguage:python",
-    "onView:cpTester.panel"
+    "onLanguage:python"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -28,7 +28,7 @@
         {
           "id": "cpTester",
           "title": "CP Tester",
-          "icon": "$(beaker)"
+          "icon": "$(debug-console)"
         }
       ]
     },
@@ -38,7 +38,7 @@
           "type": "webview",
           "id": "cpTester.panel",
           "name": "Tester",
-          "icon": "$(beaker)"
+          "icon": "$(debug-console)"
         }
       ]
     },
