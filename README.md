@@ -1,6 +1,7 @@
 # CP Tester（奶蛙版）
 
-> 0.1.1
+> version: 0.1.1
+
 > Editor: serendipity_lin@sjtu.edu.cn
 
 ![alt text](media/sets/c3e14ac787413473c5e74efbd69ee80f.jpg)
