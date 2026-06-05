@@ -3,10 +3,10 @@ import os
 
 statuses = {
     'None': ('#888888', 'Not Started'),
-    'Pending': ('#e5e510', 'Pending...'),
+    'Pending': ('#1E90FF', 'Pending...'),
     'AC': ('#7ee787', 'Accepted'),
-    'CE': ('#f48771', 'Compile Error'),
-    'RE': ('#f48771', 'Runtime Error'),
+    'CE': ('#e5e510', 'Compile Error'),
+    'RE': ('#e5e510', 'Runtime Error'),
     'MLE': ('#d49bdd', 'Memory Limit Exceeded'),
     'TLE': ('#d49bdd', 'Time Limit Exceeded'),
     'WA': ('#f48771', 'Wrong Answer'),
