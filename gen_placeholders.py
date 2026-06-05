@@ -4,12 +4,12 @@ import os
 statuses = {
     'None': ('#888888', 'Not Started'),
     'Pending': ('#1E90FF', 'Pending...'),
-    'AC': ('#7ee787', 'Accepted'),
-    'CE': ('#e5e510', 'Compile Error'),
-    'RE': ('#e5e510', 'Runtime Error'),
-    'MLE': ('#d49bdd', 'Memory Limit Exceeded'),
-    'TLE': ('#d49bdd', 'Time Limit Exceeded'),
-    'WA': ('#f48771', 'Wrong Answer'),
+    'AC': ("#22ff35", 'Accepted'),
+    'CE': ("#f1ff29", 'Compile Error'),
+    'RE': ('#f1ff29', 'Runtime Error'),
+    'MLE': ("#ff9f31", 'Memory Limit Exceeded'),
+    'TLE': ('#ff9f31', 'Time Limit Exceeded'),
+    'WA': ("#df2500", 'Wrong Answer'),
 }
 
 width, height = 400, 120

@@ -37,7 +37,7 @@ export async function judgeFile(
             };
             onProgress?.(pendingResult);
 
-            const runResult = await run(executablePath, tc.input, config);
+            const runResult = await run(executablePath, tc.input, config, tc.expectedOutput);
             
             // Cap time/memory at 2x limit if killed by hard limit
             let displayTime = runResult.time;

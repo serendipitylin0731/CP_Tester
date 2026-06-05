@@ -33,7 +33,8 @@ const PROCESS_VM_READ = 0x0010;
 export async function run(
     executablePath: string,
     input: string,
-    config: JudgeConfig
+    config: JudgeConfig,
+    expectedOutput: string
 ): Promise<RunResult> {
     const ext = path.extname(executablePath).toLowerCase();
     const isPython = ext === '.py';
@@ -60,9 +61,20 @@ export async function run(
     let stderr = '';
     let killed = false;
     let peakMemory = 0; // KiB
+    let stdoutTruncated = false;
+
+    // Limit stdout to 8x expected output length (minimum 1KB)
+    const maxOutputLen = Math.max(expectedOutput.length * 8, 1024);
 
     child.stdout?.on('data', (data) => {
-        stdout += data.toString();
+        if (stdoutTruncated) return;
+        const chunk = data.toString();
+        if (stdout.length + chunk.length > maxOutputLen) {
+            stdout += chunk.substring(0, maxOutputLen - stdout.length);
+            stdoutTruncated = true;
+        } else {
+            stdout += chunk;
+        }
     });
 
     child.stderr?.on('data', (data) => {
