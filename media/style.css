@@ -175,14 +175,14 @@ body {
     border-radius: 3px;
 }
 
-.status-Accepted { background: #1e4620; color: #7ee787; }
-.status-Pending { background: #3d3d00; color: #e5e510; }
-.status-Compile-Error { background: #3d1f1f; color: #f48771; }
-.status-Runtime-Error { background: #3d1f1f; color: #f48771; }
-.status-Memory-Limit-Exceeded { background: #3d1f3f; color: #d49bdd; }
-.status-Time-Limit-Exceeded { background: #3d1f3f; color: #d49bdd; }
-.status-Wrong-Answer { background: #3d1f1f; color: #f48771; }
-.status-None { background: #2c2c2c; color: #cccccc; }
+.status-Accepted { background: #1e4620; color: #22ff35; }
+.status-Pending { background: #1a2a3a; color: #1E90FF; }
+.status-Compile-Error { background: #3d3d00; color: #f1ff29; }
+.status-Runtime-Error { background: #3d3d00; color: #f1ff29; }
+.status-Memory-Limit-Exceeded { background: #3d2a00; color: #ff9f31; }
+.status-Time-Limit-Exceeded { background: #3d2a00; color: #ff9f31; }
+.status-Wrong-Answer { background: #3d0f0f; color: #df2500; }
+.status-None { background: #2c2c2c; color: #888888; }
 
 .result-meta {
     font-size: 11px;
@@ -228,4 +228,33 @@ body {
     font-weight: bold;
     margin: 10px 0 6px;
     color: var(--vscode-foreground);
+}
+
+#case-status-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.case-status-pill {
+    min-width: 48px;
+    height: 28px;
+    border-radius: 14px;
+    background: #3c3c3c;
+    transition: background 0.3s ease;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+}
+
+.case-status-text {
+    font-size: 10px;
+    font-weight: bold;
+    color: #1e1e1e;
+    line-height: 1;
+    white-space: nowrap;
 }

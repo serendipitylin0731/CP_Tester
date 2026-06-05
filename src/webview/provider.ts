@@ -214,15 +214,6 @@ export class TesterProvider implements vscode.WebviewViewProvider {
         }
     }
 
-    private _postState() {
-        this._view?.webview.postMessage({
-            type: 'state',
-            testCases: this._testCases,
-            folderMode: this._folderMode,
-            folderPath: this._folderPath
-        });
-    }
-
     private _handleExitFolderMode() {
         this._testCases = [{ id: 1, input: '', expectedOutput: '' }];
         this._folderMode = false;
@@ -230,6 +221,15 @@ export class TesterProvider implements vscode.WebviewViewProvider {
         this._view?.webview.postMessage({
             type: 'folderExited',
             testCases: this._testCases
+        });
+    }
+
+    private _postState() {
+        this._view?.webview.postMessage({
+            type: 'state',
+            testCases: this._testCases,
+            folderMode: this._folderMode,
+            folderPath: this._folderPath
         });
     }
 

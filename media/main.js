@@ -51,6 +51,77 @@
         });
     }
 
+    const statusColorMap = {
+        'None': '#3c3c3c',
+        'Pending': '#1E90FF',
+        'Accepted': '#22ff35',
+        'Compile Error': '#f1ff29',
+        'Runtime Error': '#f1ff29',
+        'Memory Limit Exceeded': '#ff9f31',
+        'Time Limit Exceeded': '#ff9f31',
+        'Wrong Answer': '#df2500',
+    };
+
+    const statusAbbrMap = {
+        'Accepted': 'AC',
+        'Compile Error': 'CE',
+        'Runtime Error': 'RE',
+        'Memory Limit Exceeded': 'MLE',
+        'Time Limit Exceeded': 'TLE',
+        'Wrong Answer': 'WA',
+        'Pending': 'Pending',
+        'None': '',
+    };
+
+    function renderCaseStatusBar() {
+        let bar = document.getElementById('case-status-bar');
+        if (!bar) {
+            bar = document.createElement('div');
+            bar.id = 'case-status-bar';
+            els.testCasesContainer.parentNode?.insertBefore(bar, els.testCasesContainer);
+        }
+        bar.style.display = 'flex';
+        bar.innerHTML = '';
+        testCases.forEach(tc => {
+            const pill = document.createElement('div');
+            pill.className = 'case-status-pill';
+            pill.dataset.id = tc.id;
+            pill.title = escapeHtml(tc.name || `Case ${tc.id}`);
+            const span = document.createElement('span');
+            span.className = 'case-status-text';
+            span.textContent = '';
+            pill.appendChild(span);
+            bar.appendChild(pill);
+        });
+    }
+
+    function updateCaseStatusPill(id, status) {
+        const pill = document.querySelector(`.case-status-pill[data-id="${id}"]`);
+        if (pill) {
+            pill.style.background = statusColorMap[status] || '#3c3c3c';
+            const text = pill.querySelector('.case-status-text');
+            if (text) text.textContent = statusAbbrMap[status] || '';
+        }
+    }
+
+    function resetCaseStatusBar() {
+        document.querySelectorAll('.case-status-pill').forEach(pill => {
+            pill.style.background = '#3c3c3c';
+            const text = pill.querySelector('.case-status-text');
+            if (text) text.textContent = '';
+        });
+    }
+
+    function hideCaseStatusBar() {
+        const bar = document.getElementById('case-status-bar');
+        if (bar) bar.style.display = 'none';
+    }
+
+    function showCaseStatusBar() {
+        const bar = document.getElementById('case-status-bar');
+        if (bar) bar.style.display = 'flex';
+    }
+
     function renderTestCases() {
         els.testCasesContainer.innerHTML = '';
 
@@ -139,8 +210,10 @@
             });
         }
 
-        // Clear previous results from each test case's result area
+        // Clear previous results and create/show status bar with Pending
         document.querySelectorAll('.result-area').forEach(el => el.innerHTML = '');
+        renderCaseStatusBar();
+        testCases.forEach(tc => updateCaseStatusPill(tc.id, 'Pending'));
         updateImage('Pending');
 
         vscode.postMessage({
@@ -174,6 +247,8 @@
     }
 
     function showResult(result) {
+        updateCaseStatusPill(result.id, result.status);
+
         let el = document.getElementById(`result-${result.id}`);
         if (!el) {
             // If result area doesn't exist yet (shouldn't happen with new render), create one
@@ -296,6 +371,7 @@
 
             case 'clearResults':
                 document.querySelectorAll('.result-area').forEach(el => el.innerHTML = '');
+                hideCaseStatusBar();
                 break;
         }
     });
