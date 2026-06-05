@@ -2,11 +2,11 @@
   "name": "cp-tester",
   "displayName": "CP Tester",
   "description": "A VS Code extension for program testing",
-  "version": "0.3.4",
+  "version": "1.0.0",
   "icon": "media/sets/2aa335b0c9913e5d01b2c17554b8e857.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/serendipitylin0731/CP_Tester.git"
+    "url": "https://github.com/serendipitylin0731/CP_Tester_Windows.git"
   },
   "publisher": "cp-tester",
   "license": "MIT",
