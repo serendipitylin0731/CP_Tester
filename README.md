@@ -1,6 +1,6 @@
 # CP Tester（奶蛙版）
 
-> version: windows-0.3.4
+> version: windows-1.0.0
 
 > Editor: serendipity_lin@sjtu.edu.cn
 
