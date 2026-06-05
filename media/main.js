@@ -14,7 +14,11 @@
         memoryLimit: document.getElementById('memory-limit'),
         btnAdd: document.getElementById('btn-add'),
         btnFolder: document.getElementById('btn-folder'),
+        btnExe: document.getElementById('btn-exe'),
         btnRun: document.getElementById('btn-run'),
+        btnHelp: document.getElementById('btn-help'),
+        helpPanel: document.getElementById('help-panel'),
+        exeInfo: document.getElementById('exe-info'),
         folderInfo: document.getElementById('folder-info'),
         testCasesContainer: document.getElementById('test-cases'),
         resultsContainer: document.getElementById('results'),
@@ -48,6 +52,15 @@
 
         els.btnRun.addEventListener('click', () => {
             runTests();
+        });
+
+        els.btnExe.addEventListener('click', () => {
+            vscode.postMessage({ type: 'selectExecutable' });
+        });
+
+        els.btnHelp.addEventListener('click', () => {
+            const isHidden = els.helpPanel.style.display === 'none';
+            els.helpPanel.style.display = isHidden ? 'block' : 'none';
         });
     }
 
@@ -275,6 +288,22 @@
         `;
     }
 
+    function showExeInfo(exePath) {
+        els.exeInfo.style.display = 'block';
+        els.exeInfo.innerHTML = `
+            <span>EXE: ${escapeHtml(exePath)}</span>
+            <button id="btn-clear-exe" title="Clear executable">✕</button>
+        `;
+        document.getElementById('btn-clear-exe')?.addEventListener('click', () => {
+            vscode.postMessage({ type: 'clearExecutable' });
+        });
+    }
+
+    function hideExeInfo() {
+        els.exeInfo.style.display = 'none';
+        els.exeInfo.innerHTML = '';
+    }
+
     function escapeHtml(str) {
         if (str === undefined || str === null) return '';
         return str.replace(/&/g, '&amp;')
@@ -304,6 +333,9 @@
                     document.getElementById('btn-exit-folder')?.addEventListener('click', () => {
                         vscode.postMessage({ type: 'exitFolderMode' });
                     });
+                }
+                if (msg.customExecutable) {
+                    showExeInfo(msg.customExecutable);
                 }
                 renderTestCases();
                 break;
@@ -362,6 +394,14 @@
 
             case 'setFolder':
                 folderPath = msg.folderPath;
+                break;
+
+            case 'executableSet':
+                showExeInfo(msg.path);
+                break;
+
+            case 'executableCleared':
+                hideExeInfo();
                 break;
 
             case 'imageList':

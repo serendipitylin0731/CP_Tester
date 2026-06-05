@@ -27,6 +27,24 @@ export function activate(context: vscode.ExtensionContext) {
             }
         })
     );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('cpTester.selectExecutable', async () => {
+            const fileUri = await vscode.window.showOpenDialog({
+                canSelectFiles: true,
+                canSelectFolders: false,
+                canSelectMany: false,
+                openLabel: 'Select Executable',
+                filters: {
+                    'Executables': ['exe'],
+                    'All Files': ['*']
+                }
+            });
+            if (fileUri && fileUri[0]) {
+                provider.setExecutable(fileUri[0].fsPath);
+            }
+        })
+    );
 }
 
 export function deactivate() {}

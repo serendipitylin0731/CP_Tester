@@ -9,6 +9,7 @@ export class TesterProvider implements vscode.WebviewViewProvider {
     private _testCases: TestCase[] = [{ id: 1, input: '', expectedOutput: '' }];
     private _folderMode: boolean = false;
     private _folderPath: string = '';
+    private _customExecutable: string = '';
 
     constructor(
         private readonly _extensionUri: vscode.Uri,
@@ -49,6 +50,12 @@ export class TesterProvider implements vscode.WebviewViewProvider {
                 case 'exitFolderMode':
                     this._handleExitFolderMode();
                     break;
+                case 'selectExecutable':
+                    await this._handleSelectExecutable();
+                    break;
+                case 'clearExecutable':
+                    this._clearExecutable();
+                    break;
             }
         });
 
@@ -76,27 +83,41 @@ export class TesterProvider implements vscode.WebviewViewProvider {
         }
     }
 
+    public setExecutable(exePath: string) {
+        this._customExecutable = exePath;
+        this._view?.webview.postMessage({ type: 'executableSet', path: exePath });
+    }
+
     private async _handleRunTests(testCases: TestCase[], config: JudgeConfig) {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            this._view?.webview.postMessage({
-                type: 'error',
-                message: 'No active editor found'
-            });
-            return;
-        }
+        let filePath: string;
+        let customExe: string | undefined;
 
-        const filePath = editor.document.fileName;
-        const ext = path.extname(filePath).toLowerCase();
-        if (!['.cpp', '.c', '.py'].includes(ext)) {
-            this._view?.webview.postMessage({
-                type: 'error',
-                message: 'Unsupported file type. Only .cpp, .c, .py are supported.'
-            });
-            return;
-        }
+        if (this._customExecutable) {
+            // Use custom executable, no need for active editor
+            customExe = this._customExecutable;
+            filePath = customExe;
+        } else {
+            const editor = vscode.window.activeTextEditor;
+            if (!editor) {
+                this._view?.webview.postMessage({
+                    type: 'error',
+                    message: 'No active editor found. Please open a .cpp/.c/.py file or select an executable.'
+                });
+                return;
+            }
 
-        await editor.document.save();
+            filePath = editor.document.fileName;
+            const ext = path.extname(filePath).toLowerCase();
+            if (!['.cpp', '.c', '.py'].includes(ext)) {
+                this._view?.webview.postMessage({
+                    type: 'error',
+                    message: 'Unsupported file type. Only .cpp, .c, .py are supported.'
+                });
+                return;
+            }
+
+            await editor.document.save();
+        }
 
         // Update overall status to Pending
         this._view?.webview.postMessage({
@@ -109,7 +130,7 @@ export class TesterProvider implements vscode.WebviewViewProvider {
                 type: 'result',
                 result
             });
-        });
+        }, customExe);
 
         // Ensure all results are sent (e.g., compile error cases)
         for (const result of results) {
@@ -163,7 +184,7 @@ export class TesterProvider implements vscode.WebviewViewProvider {
         try {
             const files = fs.readdirSync(folderPath);
             const inFiles = files.filter(f => f.endsWith('.in')).sort();
-            const testCases: TestCase[] = [];
+            let testCases: TestCase[] = [];
             let id = 1;
 
             for (const inFile of inFiles) {
@@ -197,6 +218,13 @@ export class TesterProvider implements vscode.WebviewViewProvider {
                 return;
             }
 
+            const MAX_FOLDER_CASES = 100;
+            let truncatedMsg = '';
+            if (testCases.length > MAX_FOLDER_CASES) {
+                testCases = testCases.slice(0, MAX_FOLDER_CASES);
+                truncatedMsg = ` (truncated to ${MAX_FOLDER_CASES} cases)`;
+            }
+
             this._testCases = testCases;
             this._folderMode = true;
             this._folderPath = folderPath;
@@ -204,7 +232,7 @@ export class TesterProvider implements vscode.WebviewViewProvider {
             this._view?.webview.postMessage({
                 type: 'folderLoaded',
                 testCases,
-                folderPath
+                folderPath: folderPath + truncatedMsg
             });
         } catch (err: any) {
             this._view?.webview.postMessage({
@@ -224,12 +252,34 @@ export class TesterProvider implements vscode.WebviewViewProvider {
         });
     }
 
+    private async _handleSelectExecutable() {
+        const fileUri = await vscode.window.showOpenDialog({
+            canSelectFiles: true,
+            canSelectFolders: false,
+            canSelectMany: false,
+            openLabel: 'Select Executable',
+            filters: {
+                'Executables': ['exe'],
+                'All Files': ['*']
+            }
+        });
+        if (fileUri && fileUri[0]) {
+            this.setExecutable(fileUri[0].fsPath);
+        }
+    }
+
+    private _clearExecutable() {
+        this._customExecutable = '';
+        this._view?.webview.postMessage({ type: 'executableCleared' });
+    }
+
     private _postState() {
         this._view?.webview.postMessage({
             type: 'state',
             testCases: this._testCases,
             folderMode: this._folderMode,
-            folderPath: this._folderPath
+            folderPath: this._folderPath,
+            customExecutable: this._customExecutable
         });
     }
 
@@ -285,8 +335,16 @@ export class TesterProvider implements vscode.WebviewViewProvider {
         <div id="actions">
             <button id="btn-add" title="Add test case">+</button>
             <button id="btn-folder" title="Load from folder">📁</button>
+            <button id="btn-exe" title="Select executable">📥</button>
             <button id="btn-run" title="Run tests">▶ Run</button>
+            <button id="btn-help" title="Help">?</button>
         </div>
+        <div id="help-panel" style="display:none;">
+            <p><strong>+</strong>：添加一组测试数据（输入 + 期望输出），最多 5 组。</p>
+            <p><strong>📥 导入 EXE</strong>：选择已编译好的 .exe 文件，直接运行测试而不再编译当前代码。</p>
+            <p><strong>📁 加载文件夹</strong>：选择包含 .in / .out（或 .ans）文件对的文件夹，批量导入测试数据，最多 100 组。</p>
+        </div>
+        <div id="exe-info" style="display:none;"></div>
         <div id="folder-info" style="display:none;"></div>
         <div id="test-cases"></div>
         <div id="results"></div>

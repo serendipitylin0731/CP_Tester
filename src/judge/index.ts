@@ -7,24 +7,30 @@ export async function judgeFile(
     filePath: string,
     testCases: TestCase[],
     config: JudgeConfig,
-    onProgress?: (result: TestResult) => void
+    onProgress?: (result: TestResult) => void,
+    customExecutable?: string
 ): Promise<TestResult[]> {
     const results: TestResult[] = [];
 
-    // Compile first
-    const compileResult = await compile(filePath);
-    if (!compileResult.success) {
-        return testCases.map(tc => ({
-            id: tc.id,
-            name: tc.name,
-            status: Status.CompileError,
-            time: 0,
-            memory: 0,
-            errorMessage: compileResult.error,
-        }));
-    }
+    let executablePath: string;
 
-    const executablePath = compileResult.executablePath!;
+    if (customExecutable) {
+        executablePath = customExecutable;
+    } else {
+        // Compile first
+        const compileResult = await compile(filePath);
+        if (!compileResult.success) {
+            return testCases.map(tc => ({
+                id: tc.id,
+                name: tc.name,
+                status: Status.CompileError,
+                time: 0,
+                memory: 0,
+                errorMessage: compileResult.error,
+            }));
+        }
+        executablePath = compileResult.executablePath!;
+    }
 
     try {
         for (const tc of testCases) {
@@ -63,7 +69,10 @@ export async function judgeFile(
             onProgress?.(result);
         }
     } finally {
-        cleanupExecutable(executablePath);
+        // Only cleanup compiled executables, not user-provided ones
+        if (!customExecutable) {
+            cleanupExecutable(executablePath);
+        }
     }
 
     return results;
