@@ -183,7 +183,7 @@ export class TesterProvider implements vscode.WebviewViewProvider {
     private async _handleLoadFromFolder(folderPath: string) {
         try {
             const files = fs.readdirSync(folderPath);
-            const inFiles = files.filter(f => f.endsWith('.in')).sort();
+            const inFiles = files.filter(f => f.endsWith('.in')).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
             let testCases: TestCase[] = [];
             let id = 1;
 

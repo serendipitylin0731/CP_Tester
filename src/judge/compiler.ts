@@ -24,11 +24,12 @@ export async function compile(sourcePath: string): Promise<CompileResult> {
 
     const outFile = path.join(tmpDir, `cp_tester_${basename}_${Date.now()}${os.platform() === 'win32' ? '.exe' : ''}`);
 
+    const stackFlag = os.platform() === 'win32' ? ' -Wl,--stack,268435456' : '';
     let command: string;
     if (ext === '.cpp') {
-        command = `g++ -std=c++17 -O2 -o "${outFile}" "${sourcePath}"`;
+        command = `g++ -std=c++17 -O2${stackFlag} -o "${outFile}" "${sourcePath}"`;
     } else if (ext === '.c') {
-        command = `gcc -O2 -o "${outFile}" "${sourcePath}"`;
+        command = `gcc -O2${stackFlag} -o "${outFile}" "${sourcePath}"`;
     } else {
         return { success: false, error: `Unsupported file extension: ${ext}` };
     }
