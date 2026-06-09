@@ -43,7 +43,9 @@ export async function run(
 
     if (isPython) {
         command = process.platform === 'win32' ? 'python' : 'python3';
-        args = [executablePath];
+        // Boost recursion limit so deep recursions don't hit the default 1000 limit / C stack
+        const pyPath = JSON.stringify(executablePath);
+        args = ['-c', `import sys; sys.setrecursionlimit(1000000); exec(compile(open(${pyPath}, 'rb').read(), ${pyPath}, 'exec'))`];
     } else {
         command = executablePath;
     }
